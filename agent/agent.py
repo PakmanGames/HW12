@@ -7,6 +7,13 @@ from google import genai
 import datetime
 import requests
 from docker_tools import get_container_state, get_container_logs
+from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+
+load_dotenv()
+class GeminiResponse(BaseModel):
+    explanation: str = Field(..., description="Detailed explanation of the error")
+    suggestedFix: str = Field(..., description="Suggested fix for the error")
 
 gemini_api = os.environ.get("GENAI_API_KEY")
 backend_route = os.environ.get("AGENT_BACKEND_URL")
@@ -27,6 +34,7 @@ def post_status( error: str, explanation: str, suggestion: str, time: datetime.d
         "occurredAt": time.isoformat()
     }
     
+    print(f"Posting status to backend: {payload}")
     error_route = f"{backend_route}/api/errors"
 
     try:
@@ -41,13 +49,15 @@ def post_status( error: str, explanation: str, suggestion: str, time: datetime.d
 
 def get_gemini_response(prompt: str) -> str:
     client = genai.Client(api_key=gemini_api)
-    response = client.chat.completions.create(
-        model="gemini-1.5-flash",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
+    response = client.models.generate_content(
+        model="gemini-2.5-pro",
+        contents= prompt,
+        config={
+            "response_mime_type" : "application/json",
+            "response_schema" : GeminiResponse
+        }
     )
-    return response.choices[0].message.content
+    return GeminiResponse.model_validate_json(response.text).model_dump()
 
 
 
@@ -67,11 +77,16 @@ def on_fail(container_name: str, logs: str):
     """Called when a container transitions from alive to fail"""
     # TODO: Implement failure handling logic
     print(f"[{container_name}] 🔥 FAILURE DETECTED - Transitioning to FAIL state")
-    # This is where you can add custom logic like:
-    # - Analyze logs with AI
-    # - Send alerts
-    # - Attempt recovery
-    # - Post to backend
+
+    response = get_gemini_response(f"Analyze the following Docker container logs and provide a concise explanation of the failure along with suggested fixes:\n\n{logs}")
+
+
+    post_status( error=f"Container {container_name} failed",
+                 explanation=response['explanation'],
+                 suggestion=response['suggestedFix'],
+                 time=datetime.datetime.utcnow()
+    )
+
 
 
 def main():

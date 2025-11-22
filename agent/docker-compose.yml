@@ -1,0 +1,25 @@
+services:
+  monitor:
+    build: .
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - internal
+    restart: always
+
+  app:
+    image: alpine
+    command: sleep infinity
+    networks:
+      - internal
+    restart: always
+
+  test-container:
+    image: alpine
+    command: sh -c "echo 'Starting test container...'; echo 'Connecting to database...'; sleep 3; echo 'ERROR Failed to connect to database at db.example.com:5432'; echo 'ERROR Connection timeout after 30 seconds'; echo 'ERROR Unable to establish connection'; echo 'Stack trace:'; echo '  at connect() line 42'; echo '  at main() line 10'; sleep 7; echo 'FATAL Application crashed'; exit 1"
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

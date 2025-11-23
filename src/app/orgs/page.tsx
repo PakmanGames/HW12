@@ -61,7 +61,7 @@ export default function OrgsPage() {
 
   return (
     <PageTransition>
-      <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6 px-4 pt-6 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold text-[#f0f6fc]">Organizations</h1>
           <button

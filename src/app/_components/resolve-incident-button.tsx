@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function ResolveIncidentButton({ incidentId }: { incidentId: string }) {
+export function ResolveIncidentButton({ 
+  incidentId, 
+  onResolved 
+}: { 
+  incidentId: string;
+  onResolved?: () => void;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -21,8 +27,13 @@ export function ResolveIncidentButton({ incidentId }: { incidentId: string }) {
         throw new Error("Failed to resolve incident");
       }
 
-      // Refresh the page to show updated status
-      router.refresh();
+      // Call the callback to refetch data if provided
+      if (onResolved) {
+        onResolved();
+      } else {
+        // Fallback: refresh the page
+        router.refresh();
+      }
     } catch (error) {
       console.error("Error resolving incident:", error);
       alert("Failed to resolve incident. Please try again.");

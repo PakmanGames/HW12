@@ -5,7 +5,7 @@ import { Navigation } from "./_components/navigation";
 import { TransitionProvider } from "./_components/transition-provider";
 
 export const metadata = {
-  title: "Sentric",
+  title: "Continuum",
   description: "Incident Management Dashboard",
 };
 

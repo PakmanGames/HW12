@@ -5,6 +5,9 @@ import { useState } from "react";
 import { useEffect } from "react";
 import type { Server, Incident } from "~/lib/mock-data";
 import { PageTransition } from "../_components/page-transition";
+import { TrendGraph } from "~/app/_components/trend-graph";
+import { IncidentTimeline } from "~/app/_components/incident-timeline";
+import { mockServers, mockIncidents } from "~/lib/mock-data";
 
 export default function DashboardPage() {
   const [servers, setServers] = useState<Server[]>([]);
@@ -25,23 +28,33 @@ export default function DashboardPage() {
         setServers(serversData);
 
         // Fetch errors/incidents
-        const errorsRes = await fetch("/api/error");
-        if (!errorsRes.ok) throw new Error("Failed to fetch errors");
-        const errorsData = await errorsRes.json();
+        try {
+          const errorsRes = await fetch("/api/error");
+          if (!errorsRes.ok) {
+            const errorData = await errorsRes.json().catch(() => ({}));
+            console.error("Error API response:", errorsRes.status, errorData);
+            throw new Error(`Failed to fetch errors: ${errorsRes.status} ${errorData.error || ""}`);
+          }
+          const errorsData = await errorsRes.json();
 
-        // Transform errors to incidents format
-        const incidentsData: Incident[] = errorsData.map((incident: any) => ({
-          id: incident.id.toString(),
-          serverId: incident.serverId?.toString() ?? "unknown",
-          serverName: incident.serverName ?? "Unknown server",
-          timestamp: new Date(incident.timestamp),
-          logs: incident.logs ?? "",
-          aiSummary: incident.aiSummary ?? "",
-          aiFix: incident.aiFix ?? "",
-          resolved: incident.resolved ?? false,
-        }));
+          // Transform errors to incidents format (matching database schema)
+          const incidentsData: Incident[] = errorsData.map((error: any) => ({
+            id: error.id?.toString() ?? "unknown",
+            serverId: error.containerId?.toString() ?? "unknown",
+            serverName: error.serviceName ?? "Unknown server",
+            timestamp: new Date(error.occurredAt),
+            logs: error.errorMessage ?? "",
+            aiSummary: error.explaination ?? "",
+            aiFix: error.suggestedFix ?? "",
+            resolved: error.resolved ?? false,
+          }));
 
-        setIncidents(incidentsData);
+          setIncidents(incidentsData);
+        } catch (errorErr) {
+          console.error("Error fetching incidents:", errorErr);
+          // Set empty array instead of breaking the whole page
+          setIncidents([]);
+        }
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err instanceof Error ? err.message : "Failed to load data");
@@ -60,7 +73,7 @@ export default function DashboardPage() {
     (i) => i.timestamp.getTime() > Date.now() - 86400000,
   ).length;
 
-  const recentIncidents = incidents
+  const recentIncidents = [...incidents]
     .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
     .slice(0, 5);
 
@@ -83,7 +96,7 @@ export default function DashboardPage() {
   return (
     <PageTransition>
       <div className="mx-52 space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pt-6">
           <h1 className="text-3xl font-bold text-[#f0f6fc]">Dashboard</h1>
           <button
             onClick={async () => {
@@ -104,6 +117,10 @@ export default function DashboardPage() {
             Run Stress Test
           </button>
         </div>
+        <TrendGraph incidents={incidents} />
+
+        {/* NEW: Timeline Section */}
+        <IncidentTimeline incidents={incidents} />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -244,7 +261,7 @@ export default function DashboardPage() {
               recentIncidents.map((incident) => (
                 <Link
                   key={incident.id}
-                  href={`/incidents/${incident.id}`}
+                  href={`/error/${incident.id}`}
                   className="block px-6 py-4 transition-colors hover:bg-[#1f2937]"
                 >
                   <div className="flex items-center justify-between">
@@ -365,7 +382,4 @@ export default function DashboardPage() {
       </div>
     </PageTransition>
   );
-}
-function setIncidents(incidentsData: Incident[]) {
-  throw new Error("Function not implemented.");
 }

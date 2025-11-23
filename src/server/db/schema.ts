@@ -51,13 +51,17 @@ export const statuses = createTable("status", (d) => ({
 
 export const errors = createTable("error", (d) => ({
   id: d.integer().primaryKey().generatedByDefaultAsIdentity(),
+  agentId: d.integer().notNull(),
   containerId: d
     .integer()
     .notNull()
     .references(() => containers.id, { onDelete: "cascade" }),
+  serviceName: d.varchar({ length: 256 }).default("unknown").notNull(),
   errorMessage: d.varchar({ length: 1024 }).notNull(),
   explaination: d.varchar({ length: 2048 }).notNull(),
   suggestedFix: d.varchar({ length: 2048 }).notNull(),
+  resolved: d.boolean().default(false).notNull(),
+  resolvedAt: d.timestamp({ withTimezone: true }),
   occurredAt: d
     .timestamp({ withTimezone: true })
     .default(sql`NOW()`)

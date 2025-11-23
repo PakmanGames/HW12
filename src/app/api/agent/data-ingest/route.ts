@@ -8,7 +8,9 @@ import * as schema from "~/server/db/schema";
 import { env } from "~/env";
 
 const ingestPayload = z.object({
+  agentId: z.number().int().positive(),
   containerId: z.number().int().positive(),
+  serviceName: z.string().min(1),
   errorMessage: z.string().min(1).optional(),
   explanation: z.string().min(1).optional(),
   suggestedFix: z.string().min(1).optional(),
@@ -33,10 +35,17 @@ export async function POST(request: Request) {
       payload.suggestedFix ?? "No suggested fix provided by the agent.";
 
     await db.insert(schema.errors).values({
+      agentId: payload.agentId,
       containerId: payload.containerId,
-      errorMessage,
-      explaination: explanation,
-      suggestedFix,
+      serviceName: payload.serviceName,
+      errorMessage:
+        payload.errorMessage ??
+        payload.errorLogs ??
+        "No error message provided",
+      explaination:
+        payload.explanation ?? "No explanation provided by the agent.",
+      suggestedFix:
+        payload.suggestedFix ?? "No suggested fix provided by the agent.",
       occurredAt,
     });
 

@@ -44,8 +44,7 @@ export default function DashboardPage() {
           resolved: incident.resolved ?? false,
         }));
 
-        setIncidents(mockIncidents);
-        console.log("Fetched incidents:", mockIncidents);
+        setIncidents(incidentsData);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError(err instanceof Error ? err.message : "Failed to load data");
@@ -373,7 +372,4 @@ export default function DashboardPage() {
       </div>
     </PageTransition>
   );
-}
-function setIncidents(incidentsData: Incident[]) {
-  throw new Error("Function not implemented.");
 }

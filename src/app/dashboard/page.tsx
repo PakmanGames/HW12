@@ -33,7 +33,9 @@ export default function DashboardPage() {
           if (!errorsRes.ok) {
             const errorData = await errorsRes.json().catch(() => ({}));
             console.error("Error API response:", errorsRes.status, errorData);
-            throw new Error(`Failed to fetch errors: ${errorsRes.status} ${errorData.error || ""}`);
+            throw new Error(
+              `Failed to fetch errors: ${errorsRes.status} ${errorData.error || ""}`,
+            );
           }
           const errorsData = await errorsRes.json();
 
@@ -124,7 +126,7 @@ export default function DashboardPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm font-medium text-[#8b949e]">
-                Active Servers
+                Active Agents
               </p>
               <p className="text-2xl font-semibold text-[#f0f6fc]">
                 {activeServers}
@@ -201,9 +203,7 @@ export default function DashboardPage() {
               </svg>
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-[#8b949e]">
-                Errors Today
-              </p>
+              <p className="text-sm font-medium text-[#8b949e]">Errors Today</p>
               <p className="text-2xl font-semibold text-[#f0f6fc]">
                 {errorsToday}
               </p>

@@ -23,7 +23,7 @@ export function Navigation() {
               href="/dashboard"
               className="bg-gradient-to-r from-[#58a6ff] to-[#bc8cff] bg-clip-text text-xl font-bold text-transparent"
             >
-              Sentric
+              Continuum
             </Link>
             <div className="ml-10 flex space-x-1">
               {navItems.map((item) => {

@@ -1,13 +1,12 @@
-# HW12
+# Continiuum
 
-Description
+![Continiuum Logo](./public/logo.png)
 
-## PLEASE READ THIS to RUN THE HW12 project
+[https://hw-12-azure.vercel.app/ Backup Link incase domain expires in a year :skull:](https://hw-12-azure.vercel.app/)
 
-Use pnpm its better and faster for this project especially if ur laptop is slower:
-[Read this link to install pnpm](https://pnpm.io/installation)
+## Running the project
 
-### Running the project:
+[Read this link to install pnpm before running the project](https://pnpm.io/installation)
 
 ```bash
 pnpm install
@@ -15,25 +14,34 @@ pnpm install
 pnpm run dev
 ```
 
-### Running the DB studio editor thing locally:
+**Additional Scripts for DB related actions:**
 
 ```bash
+# Open the Drizzle DB editor locally
 pnpm run db:studio
+
+# First time generating a DB
+pnpm run db:generate
+pnpm run db:migrate
+
+# Any subsequent DB schema changes or table rewrites
+pnpm run db:push
+
+# Populate DB with mock data
+pnpm run db:seed-historical
+
+# Lint related
+pnpm run lint
+pnpm run lint:fix
 ```
 
-Read the `package.json` file for details on each available script
+## Architecture and Tech Stack
 
-## Extra Info
-
-The frontend route `/test-backend` is for testing backend routes don't modify anything here if you are working on frontend pls
+![Tech Stack](./public/tech-stack.png)
 
 ## Preview Images
 
-![Continiuum Logo](./public/logo.png)
-
 ![Continiuum Flow](./public/general-workflow.png)
-
-![Tech Stack](./public/tech-stack.png)
 
 ![Dashboard](./public/dashboard.png)
 
